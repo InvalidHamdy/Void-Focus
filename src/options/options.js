@@ -30,8 +30,21 @@ saveTimerBtn.addEventListener('click', async () => {
     settings.longBreak = parseInt(longBreakInput.value) || 15;
 
     await Storage.set({ settings });
+    await Storage.set({ settings });
     showToast('Timer settings saved');
 });
+
+// Test Sound logic
+const testSoundBtn = document.getElementById('testSoundBtn');
+if (testSoundBtn) {
+    testSoundBtn.addEventListener('click', () => {
+        chrome.runtime.sendMessage({ type: 'TEST_SOUND' });
+        // Visual feedback
+        const originalText = testSoundBtn.textContent;
+        testSoundBtn.textContent = 'PLAYING...';
+        setTimeout(() => testSoundBtn.textContent = originalText, 2000);
+    });
+}
 
 // Whitelist Logic
 addSiteBtn.addEventListener('click', addSite);

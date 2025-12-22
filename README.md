@@ -2,7 +2,7 @@
 
 > **Enter the Void.** A deep focus, distraction-free productivity tool for students and developers.
 
-![Void Preview](assets/icons/icon128.png)
+![Void Preview](assets/icons/Void_Logo.png)
 
 ## Overview
 

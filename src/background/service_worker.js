@@ -17,6 +17,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     }
 });
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'TEST_SOUND') {
+        TimerManager.playAudio();
+    }
+});
+
+
 // Listen for messages from Popup/Content
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'startTimer') {

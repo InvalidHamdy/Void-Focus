@@ -105,7 +105,32 @@ class TimerManager {
             priority: 2
         });
 
+        // Trigger Audio via Offscreen
+        await this.playAudio();
+
         await this.stopTimer();
+    }
+
+    async playAudio() {
+        // Create offscreen document if it doesn't exist
+        // We use a try/catch pattern which is more robust than checking for contexts
+        // because the context check can yield false negatives during rapid switching.
+        try {
+            await chrome.offscreen.createDocument({
+                url: 'src/offscreen/offscreen.html',
+                reasons: ['AUDIO_PLAYBACK'],
+                justification: 'Notification sound for timer completion',
+            });
+        } catch (error) {
+            // Ignore error if document already exists
+            if (!error.message.startsWith('Only a single offscreen')) {
+                console.error(error);
+            }
+        }
+
+        // Send message to play sound
+        // No arbitrary delay needed if we assume it exists or was just created
+        chrome.runtime.sendMessage({ type: 'PLAY_SOUND' });
     }
 
     updateBadge(text) {
