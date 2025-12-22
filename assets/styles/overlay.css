@@ -1,0 +1,7 @@
+/* Maintained inside shadow DOM mostly, but this file is loaded via manifest as CSS file. 
+   Usually better to inject styles into shadow DOM manually to ensure isolation, 
+   which is done in blocker.js. 
+   We can keep this for global resets if needed or remove it from manifest if unused.
+   For now, I'll put a dummy comment.
+*/
+/* Overlay styles handled in blocker.js shadow DOM for better isolation */

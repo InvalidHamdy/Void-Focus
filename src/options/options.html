@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Void Configuration</title>
+    <link rel="stylesheet" href="options.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Settings</h1>
+        </header>
+
+        <main>
+            <!-- Section 1: Timer (Primary) -->
+            <section class="section-primary">
+                <h2>Timer Configuration</h2>
+                <div class="timer-config">
+                    <div class="time-field">
+                        <label for="focusTime">Focus</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="focusTime" min="1" max="120">
+                            <span class="unit">min</span>
+                        </div>
+                    </div>
+                    <div class="time-field">
+                        <label for="shortBreak">Break</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="shortBreak" min="1" max="60">
+                            <span class="unit">min</span>
+                        </div>
+                    </div>
+                    <div class="time-field">
+                        <label for="longBreak">Long</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="longBreak" min="1" max="60">
+                            <span class="unit">min</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="saveTimerBtn" class="btn-primary">Save Changes</button>
+            </section>
+
+            <!-- Section 2: Whitelist (Secondary) -->
+            <section class="section-secondary">
+                <h2>Allowed during focus</h2>
+
+                <ul id="whitelist" class="whitelist-list">
+                    <!-- Items added via JS -->
+                </ul>
+
+                <div class="add-site-clean">
+                    <input type="text" id="newSite" placeholder="+ Add domain (e.g. canvas.instructure.com)">
+                    <button id="addSiteBtn" class="btn-icon" aria-label="Add">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Section 3: Behavior (Optional/Advanced) -->
+            <section class="section-tertiary">
+                <details>
+                    <summary>Advanced Behavior</summary>
+                    <div class="advanced-options">
+                        <!-- Placeholders for future features mentioned in design -->
+                        <div class="option-row disabled">
+                            <span>Strict Mode (Coming Soon)</span>
+                            <div class="toggle"></div>
+                        </div>
+                        <div class="option-row disabled">
+                            <span>Motivational Messages (Coming Soon)</span>
+                            <div class="toggle"></div>
+                        </div>
+                    </div>
+                </details>
+            </section>
+        </main>
+
+        <div id="toast" class="toast hidden">Settings Saved</div>
+    </div>
+    <script type="module" src="options.js"></script>
+</body>
+
+</html>
