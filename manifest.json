@@ -8,7 +8,8 @@
     "alarms",
     "notifications",
     "activeTab",
-    "offscreen"
+    "offscreen",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"

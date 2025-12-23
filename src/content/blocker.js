@@ -1,60 +1,88 @@
 // Blocker logic
-// This runs on every page load (document_start)
+// Runs on page load AND listens for state changes
 
-(async () => {
+let overlayHost = null;
+
+async function checkAndEnforce() {
     try {
-        const result = await chrome.storage.local.get(['timerState', 'settings', 'whitelist']);
+        const result = await chrome.storage.local.get(['timerState', 'settings']);
         const timerState = result.timerState || { status: 'idle' };
         const settings = result.settings || { whitelist: [] };
         const whitelist = settings.whitelist || [];
 
         // Logic:
-        // 1. If not in FOCUS mode, do nothing.
+        // 1. If not in FOCUS mode -> Ensure NO overlay.
         // 2. If in FOCUS mode:
-        //    a. Check if current Hostname is in Whitelist.
-        //    b. If YES, do nothing.
-        //    c. If NO, Block.
+        //    a. Check whitelist.
+        //    b. If allowed -> Ensure NO overlay.
+        //    c. If blocked -> Ensure YES overlay.
 
         if (timerState.status !== 'focus') {
+            removeOverlay();
             return;
         }
 
         const currentHost = window.location.hostname;
-
-        // Whitelist check (exact match or subdomain check)
         const isAllowed = whitelist.some(allowed => {
             return currentHost === allowed || currentHost.endsWith('.' + allowed);
         });
 
         if (isAllowed) {
+            removeOverlay();
             return;
         }
 
-        // BLOCKING ACTIVATED
+        // Apply Blocking
         createOverlay();
 
     } catch (e) {
         console.error('Focus Flow Blocker Error:', e);
     }
+}
 
-    function createOverlay() {
-        // Ensure we have a target to append to
-        const target = document.documentElement || document.body;
-        if (!target) {
-            // Should theoretically not happen if run_at is document_start, but just in case
-            window.addEventListener('DOMContentLoaded', createOverlay);
-            return;
+// Listen for changes (Instant Blocking/Unblocking)
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local') {
+        if (changes.timerState || changes.settings) {
+            checkAndEnforce();
         }
+    }
+});
 
-        // Create Shadow DOM to isolate styles
-        const host = document.createElement('div');
-        host.id = 'focus-flow-overlay-host';
-        target.appendChild(host);
+// Initial Check
+checkAndEnforce();
 
-        const shadow = host.attachShadow({ mode: 'closed' });
+function removeOverlay() {
+    if (overlayHost) {
+        overlayHost.remove();
+        overlayHost = null;
 
-        const style = document.createElement('style');
-        style.textContent = `
+        // Restore scrolling
+        if (document.body) document.body.style.overflow = '';
+        if (document.documentElement) document.documentElement.style.overflow = '';
+    }
+}
+
+function createOverlay() {
+    if (overlayHost) return; // Already blocked
+
+    // Ensure we have a target to append to
+    const target = document.documentElement || document.body;
+    if (!target) {
+        window.addEventListener('DOMContentLoaded', createOverlay);
+        return;
+    }
+
+    // Create Shadow DOM to isolate styles
+    const host = document.createElement('div');
+    host.id = 'focus-flow-overlay-host';
+    target.appendChild(host);
+    overlayHost = host;
+
+    const shadow = host.attachShadow({ mode: 'closed' });
+
+    const style = document.createElement('style');
+    style.textContent = `
             :host { all: initial; }
             .overlay {
                 position: fixed;
@@ -148,57 +176,52 @@
                 transform: translateY(-1px);
             }
         `;
-        shadow.appendChild(style);
+    shadow.appendChild(style);
 
-        const overlay = document.createElement('div');
-        overlay.className = 'overlay';
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
 
-        // Animation Dot
-        const dot = document.createElement('div');
-        dot.className = 'breathing-dot';
+    // Animation Dot
+    const dot = document.createElement('div');
+    dot.className = 'breathing-dot';
 
-        // Header
-        const header = document.createElement('h1');
-        header.textContent = "VOID";
+    // Header
+    const header = document.createElement('h1');
+    header.textContent = "VOID";
 
-        // Main Message
-        const primaryMsg = document.createElement('div');
-        primaryMsg.className = 'message-primary';
-        primaryMsg.textContent = "You chose to focus.";
+    // Main Message
+    const primaryMsg = document.createElement('div');
+    primaryMsg.className = 'message-primary';
+    primaryMsg.textContent = "You chose to focus.";
 
-        // Sub Message
-        const secondaryMsg = document.createElement('div');
-        secondaryMsg.className = 'message-secondary';
-        secondaryMsg.textContent = "This site is not part of your study session.";
+    // Sub Message
+    const secondaryMsg = document.createElement('div');
+    secondaryMsg.className = 'message-secondary';
+    secondaryMsg.textContent = "This site is not part of your study session.";
 
-        // Actions
-        const actions = document.createElement('div');
-        actions.className = 'actions';
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'actions';
 
-        const goBackBtn = document.createElement('button');
-        goBackBtn.className = 'primary';
-        goBackBtn.textContent = "Go Back";
-        goBackBtn.onclick = () => window.history.back();
+    const goBackBtn = document.createElement('button');
+    goBackBtn.className = 'primary';
+    goBackBtn.textContent = "Go Back";
+    goBackBtn.onclick = () => window.history.back();
 
-        actions.appendChild(goBackBtn);
+    actions.appendChild(goBackBtn);
 
-        overlay.appendChild(dot);
-        overlay.appendChild(header);
-        overlay.appendChild(primaryMsg);
-        overlay.appendChild(secondaryMsg);
-        overlay.appendChild(actions);
+    overlay.appendChild(dot);
+    overlay.appendChild(header);
+    overlay.appendChild(primaryMsg);
+    overlay.appendChild(secondaryMsg);
+    overlay.appendChild(actions);
 
-        shadow.appendChild(overlay);
+    shadow.appendChild(overlay);
 
-        // Safe overflow handling
-        if (document.body) {
-            document.body.style.overflow = 'hidden';
-        } else if (document.documentElement) {
-            document.documentElement.style.overflow = 'hidden';
-        } else {
-            window.addEventListener('DOMContentLoaded', () => {
-                document.body.style.overflow = 'hidden';
-            });
-        }
+    // Safe overflow handling
+    if (document.body) {
+        document.body.style.overflow = 'hidden';
+    } else if (document.documentElement) {
+        document.documentElement.style.overflow = 'hidden';
     }
-})();
+}

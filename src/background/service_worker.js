@@ -5,6 +5,19 @@ import TimerManager from './timer_manager.js';
 chrome.runtime.onInstalled.addListener(async () => {
     await Storage.init();
     console.log('Focus Flow installed');
+
+    // Inject content script into existing tabs
+    try {
+        const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+        for (const tab of tabs) {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['src/content/blocker.js']
+            }).catch(err => console.log('Injection failed for tab:', tab.id, err));
+        }
+    } catch (e) {
+        console.error('Failed to inject into existing tabs:', e);
+    }
 });
 
 // Initialize timer manager (alarms etc)
