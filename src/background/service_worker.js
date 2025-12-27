@@ -30,15 +30,15 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     }
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'TEST_SOUND') {
-        TimerManager.playAudio();
-    }
-});
-
-
-// Listen for messages from Popup/Content
+// Listen for messages from Popup/Content/Options
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    // Handle test sound request
+    if (message.type === 'TEST_SOUND') {
+        TimerManager.playAudio();
+        return false;
+    }
+
+    // Handle timer actions
     if (message.action === 'startTimer') {
         TimerManager.startTimer(message.type).then(() => sendResponse({ success: true }));
         return true; // Keep channel open
